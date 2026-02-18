@@ -1,20 +1,47 @@
-# Python To-Do List App 📝
+📝 Advanced CLI To-Do List App
 
-A simple **command-line To-Do List application** written in Python.  
-This app allows you to **add, view, and delete tasks** with persistent storage using a JSON file.
+A simple but powerful command-line To-Do List application built with Python.
+This project allows users to manage tasks efficiently with persistent storage using JSON.
 
----
+🚀 Features
 
-## Features
+📋 View all tasks
 
-- Add new tasks
-- View all tasks
-- Delete tasks by number
-- Tasks are saved in a file (`tasks.json`) so they persist between runs
-- Easy and lightweight CLI interface
+➕ Add new tasks
 
----
+🗑 Delete tasks
 
+✅ Mark tasks as completed
+
+📅 Add optional due dates
+
+🕒 Automatic creation timestamp
+
+💾 Persistent storage using tasks.json
+
+🛡 Input validation (prevents crashes)
+🛠 Technologies Used
+
+Python 3
+
+JSON for data persistence
+
+datetime module for timestamps
+
+📈 Future Improvements
+
+🔎 Search functionality
+
+📊 Progress tracking percentage
+
+🏷 Task categories
+
+🌐 GUI version
+
+☁ Cloud sync version
+
+🎯 Project Goal
+building and improving projects daily to strengthen my Python and software development skills.
 
 License
 
