@@ -3,7 +3,6 @@ from datetime import datetime
 
 FILE = "tasks.json"
 
-
 def load_tasks():
     try:
         with open(FILE, "r") as f:
@@ -11,11 +10,9 @@ def load_tasks():
     except:
         return []
 
-
 def save_tasks(tasks):
     with open(FILE, "w") as f:
         json.dump(tasks, f, indent=4)
-
 
 def display_tasks(tasks):
     if not tasks:
@@ -32,7 +29,6 @@ def display_tasks(tasks):
         print(f"   Added  : {task['created_at']}")
         print("-" * 50)
 
-
 def add_task(tasks):
     title = input("Task title: ").strip()
     due_date = input("Due date (YYYY-MM-DD or leave empty): ").strip()
@@ -48,7 +44,6 @@ def add_task(tasks):
     save_tasks(tasks)
     print(" Task added successfully!")
 
-
 def delete_task(tasks):
     display_tasks(tasks)
     try:
@@ -56,12 +51,11 @@ def delete_task(tasks):
         if 0 <= idx < len(tasks):
             removed = tasks.pop(idx)
             save_tasks(tasks)
-            print(f"🗑 Deleted: {removed['title']}")
+            print(f" Deleted: {removed['title']}")
         else:
             print(" Invalid number.")
     except ValueError:
         print(" Please enter a valid number.")
-
 
 def mark_completed(tasks):
     display_tasks(tasks)
@@ -76,6 +70,25 @@ def mark_completed(tasks):
     except ValueError:
         print(" Please enter a valid number.")
 
+def edit_task(tasks):
+    display_tasks(tasks)
+    try:
+        idx = int(input("Enter task number to edit: ")) - 1
+        if 0 <= idx < len(tasks):
+            new_title = input("New title (leave empty to keep current): ").strip()
+            new_due = input("New due date (leave empty to keep current): ").strip()
+
+            if new_title:
+                tasks[idx]["title"] = new_title
+            if new_due:
+                tasks[idx]["due_date"] = new_due
+
+            save_tasks(tasks)
+            print(" Task updated!")
+        else:
+            print(" Invalid number.")
+    except ValueError:
+        print(" Please enter a valid number.")
 
 def main():
     tasks = load_tasks()
@@ -86,7 +99,8 @@ def main():
         print("2. Add Task")
         print("3. Delete Task")
         print("4. Mark Task as Completed")
-        print("5. Exit")
+        print("5. Edit Task")
+        print("6. Exit")
 
         choice = input("Choose: ")
 
@@ -99,11 +113,12 @@ def main():
         elif choice == "4":
             mark_completed(tasks)
         elif choice == "5":
+            edit_task(tasks)
+        elif choice == "6":
             print(" Goodbye!")
             break
         else:
             print(" Invalid choice.")
-
 
 if __name__ == "__main__":
     main()
