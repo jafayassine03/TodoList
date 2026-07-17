@@ -4,10 +4,6 @@ from datetime import datetime
 FILE = "tasks.json"
 
 
-# =========================
-# FILE HANDLING
-# =========================
-
 def load_tasks():
     try:
         with open(FILE, "r") as f:
@@ -20,10 +16,6 @@ def save_tasks(tasks):
     with open(FILE, "w") as f:
         json.dump(tasks, f, indent=4)
 
-
-# =========================
-# HELPERS
-# =========================
 
 def sort_tasks(tasks):
     return sorted(
@@ -50,10 +42,6 @@ def display_single_task(index, task):
     print("-" * 50)
 
 
-# =========================
-# DISPLAY TASKS
-# =========================
-
 def display_tasks(tasks):
     tasks = sort_tasks(tasks)
 
@@ -67,10 +55,6 @@ def display_tasks(tasks):
     for i, task in enumerate(tasks, start=1):
         display_single_task(i, task)
 
-
-# =========================
-# ADD TASK
-# =========================
 
 def add_task(tasks):
     print("\nADD NEW TASK")
@@ -97,7 +81,6 @@ def add_task(tasks):
         print("Invalid priority. Defaulting to Medium.")
         priority = 2
 
-    # Validate date
     if due_date:
         try:
             datetime.strptime(due_date, "%Y-%m-%d")
@@ -121,10 +104,6 @@ def add_task(tasks):
 
     print("Task added successfully!")
 
-
-# =========================
-# DELETE TASK
-# =========================
 
 def delete_task(tasks):
     if not tasks:
@@ -152,10 +131,6 @@ def delete_task(tasks):
     except ValueError:
         print("Please enter a valid number.")
 
-
-# =========================
-# MARK COMPLETED
-# =========================
 
 def mark_completed(tasks):
     if not tasks:
@@ -189,10 +164,6 @@ def mark_completed(tasks):
     except ValueError:
         print("Please enter a valid number.")
 
-
-# =========================
-# EDIT TASK
-# =========================
 
 def edit_task(tasks):
     if not tasks:
@@ -255,10 +226,6 @@ def edit_task(tasks):
         print("Please enter a valid number.")
 
 
-# =========================
-# SEARCH TASKS
-# =========================
-
 def search_tasks(tasks):
     keyword = input(
         "Enter keyword or category to search: "
@@ -283,10 +250,6 @@ def search_tasks(tasks):
     for i, task in enumerate(found_tasks, start=1):
         display_single_task(i, task)
 
-
-# =========================
-# TASK STATISTICS
-# =========================
 
 def task_stats(tasks):
     total = len(tasks)
@@ -331,10 +294,6 @@ def task_stats(tasks):
     print(f"Low Priority    : {low}")
 
 
-# =========================
-# CLEAR COMPLETED TASKS
-# =========================
-
 def clear_completed(tasks):
     completed_tasks = [task for task in tasks if task["completed"]]
 
@@ -358,9 +317,103 @@ def clear_completed(tasks):
         print("Operation cancelled.")
 
 
-# =========================
-# MAIN PROGRAM
-# =========================
+def filter_by_priority(tasks):
+    try:
+        priority = int(input("Filter by priority (1=High, 2=Medium, 3=Low): ").strip())
+        if priority not in [1, 2, 3]:
+            print("Invalid priority. Please enter 1, 2, or 3.")
+            return
+
+        filtered = [task for task in tasks if task["priority"] == priority]
+        
+        if not filtered:
+            print(f"\nNo tasks found with priority {priority}.")
+            return
+
+        print(f"\nTASKS WITH PRIORITY {priority}")
+        print("=" * 50)
+        
+        for i, task in enumerate(filtered, start=1):
+            display_single_task(i, task)
+
+    except ValueError:
+        print("Please enter a valid number.")
+
+
+def filter_by_category(tasks):
+    category = input("Enter category to filter: ").strip().lower()
+    
+    if not category:
+        print("Category cannot be empty.")
+        return
+
+    filtered = [task for task in tasks if task["category"].lower() == category]
+    
+    if not filtered:
+        print(f"\nNo tasks found in category '{category}'.")
+        return
+
+    print(f"\nTASKS IN CATEGORY: {category}")
+    print("=" * 50)
+    
+    for i, task in enumerate(filtered, start=1):
+        display_single_task(i, task)
+
+
+def filter_by_status(tasks):
+    print("\nFilter by status:")
+    print("1. Pending")
+    print("2. Completed")
+    
+    try:
+        choice = int(input("Choose option (1-2): ").strip())
+        
+        if choice == 1:
+            filtered = [task for task in tasks if not task["completed"]]
+            status = "PENDING"
+        elif choice == 2:
+            filtered = [task for task in tasks if task["completed"]]
+            status = "COMPLETED"
+        else:
+            print("Invalid option.")
+            return
+
+        if not filtered:
+            print(f"\nNo {status.lower()} tasks found.")
+            return
+
+        print(f"\n{status} TASKS")
+        print("=" * 50)
+        
+        for i, task in enumerate(filtered, start=1):
+            display_single_task(i, task)
+
+    except ValueError:
+        print("Please enter a valid number.")
+
+
+def view_upcoming_tasks(tasks):
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    upcoming = [
+        task for task in tasks 
+        if not task["completed"] 
+        and task["due_date"] != "9999-12-31"
+        and task["due_date"] >= today
+    ]
+    
+    upcoming = sorted(upcoming, key=lambda x: x["due_date"])
+    
+    if not upcoming:
+        print("\nNo upcoming tasks found.")
+        return
+
+    print("\nUPCOMING TASKS")
+    print("=" * 50)
+    
+    for i, task in enumerate(upcoming, start=1):
+        display_single_task(i, task)
+
 
 def main():
     tasks = load_tasks()
@@ -376,7 +429,11 @@ def main():
         print("6. Search Tasks")
         print("7. Task Statistics")
         print("8. Clear Completed Tasks")
-        print("9. Exit")
+        print("9. Filter by Priority")
+        print("10. Filter by Category")
+        print("11. Filter by Status")
+        print("12. View Upcoming Tasks")
+        print("13. Exit")
 
         choice = input("\nChoose an option: ").strip()
 
@@ -405,6 +462,18 @@ def main():
             clear_completed(tasks)
 
         elif choice == "9":
+            filter_by_priority(tasks)
+
+        elif choice == "10":
+            filter_by_category(tasks)
+
+        elif choice == "11":
+            filter_by_status(tasks)
+
+        elif choice == "12":
+            view_upcoming_tasks(tasks)
+
+        elif choice == "13":
             print("Goodbye!")
             break
 
