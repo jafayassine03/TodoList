@@ -1,8 +1,8 @@
+```python
 import json
 from datetime import datetime
 
 FILE = "tasks.json"
-
 
 def load_tasks():
     try:
@@ -11,11 +11,9 @@ def load_tasks():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
-
 def save_tasks(tasks):
     with open(FILE, "w") as f:
         json.dump(tasks, f, indent=4)
-
 
 def sort_tasks(tasks):
     return sorted(
@@ -27,10 +25,8 @@ def sort_tasks(tasks):
         )
     )
 
-
 def get_status(task):
     return "Done" if task["completed"] else "Pending"
-
 
 def display_single_task(index, task):
     print(f"{index}. {task['title']}")
@@ -40,7 +36,6 @@ def display_single_task(index, task):
     print(f"   Due      : {task['due_date']}")
     print(f"   Added    : {task['created_at']}")
     print("-" * 50)
-
 
 def display_tasks(tasks):
     tasks = sort_tasks(tasks)
@@ -54,7 +49,6 @@ def display_tasks(tasks):
 
     for i, task in enumerate(tasks, start=1):
         display_single_task(i, task)
-
 
 def add_task(tasks):
     print("\nADD NEW TASK")
@@ -104,7 +98,6 @@ def add_task(tasks):
 
     print("Task added successfully!")
 
-
 def delete_task(tasks):
     if not tasks:
         print("No tasks to delete.")
@@ -130,7 +123,6 @@ def delete_task(tasks):
 
     except ValueError:
         print("Please enter a valid number.")
-
 
 def mark_completed(tasks):
     if not tasks:
@@ -163,7 +155,6 @@ def mark_completed(tasks):
 
     except ValueError:
         print("Please enter a valid number.")
-
 
 def edit_task(tasks):
     if not tasks:
@@ -225,7 +216,6 @@ def edit_task(tasks):
     except ValueError:
         print("Please enter a valid number.")
 
-
 def search_tasks(tasks):
     keyword = input(
         "Enter keyword or category to search: "
@@ -249,7 +239,6 @@ def search_tasks(tasks):
 
     for i, task in enumerate(found_tasks, start=1):
         display_single_task(i, task)
-
 
 def task_stats(tasks):
     total = len(tasks)
@@ -293,7 +282,6 @@ def task_stats(tasks):
     print(f"Medium Priority : {medium}")
     print(f"Low Priority    : {low}")
 
-
 def clear_completed(tasks):
     completed_tasks = [task for task in tasks if task["completed"]]
 
@@ -315,7 +303,6 @@ def clear_completed(tasks):
         print("Completed tasks removed.")
     else:
         print("Operation cancelled.")
-
 
 def filter_by_priority(tasks):
     try:
@@ -339,7 +326,6 @@ def filter_by_priority(tasks):
     except ValueError:
         print("Please enter a valid number.")
 
-
 def filter_by_category(tasks):
     category = input("Enter category to filter: ").strip().lower()
     
@@ -358,7 +344,6 @@ def filter_by_category(tasks):
     
     for i, task in enumerate(filtered, start=1):
         display_single_task(i, task)
-
 
 def filter_by_status(tasks):
     print("\nFilter by status:")
@@ -391,7 +376,6 @@ def filter_by_status(tasks):
     except ValueError:
         print("Please enter a valid number.")
 
-
 def view_upcoming_tasks(tasks):
     today = datetime.now().strftime("%Y-%m-%d")
     
@@ -414,6 +398,60 @@ def view_upcoming_tasks(tasks):
     for i, task in enumerate(upcoming, start=1):
         display_single_task(i, task)
 
+def export_tasks(tasks):
+    if not tasks:
+        print("No tasks to export.")
+        return
+    
+    filename = input("Enter filename to export (e.g., tasks_export.json): ").strip()
+    
+    if not filename:
+        filename = f"tasks_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    
+    if not filename.endswith('.json'):
+        filename += '.json'
+    
+    try:
+        with open(filename, "w") as f:
+            json.dump(tasks, f, indent=4)
+        print(f"Tasks exported successfully to {filename}")
+    except Exception as e:
+        print(f"Error exporting tasks: {e}")
+
+def import_tasks(tasks):
+    filename = input("Enter filename to import: ").strip()
+    
+    if not filename:
+        print("Filename cannot be empty.")
+        return
+    
+    if not filename.endswith('.json'):
+        filename += '.json'
+    
+    try:
+        with open(filename, "r") as f:
+            imported_tasks = json.load(f)
+        
+        if not isinstance(imported_tasks, list):
+            print("Invalid file format. Expected a list of tasks.")
+            return
+        
+        print(f"Found {len(imported_tasks)} tasks in the file.")
+        confirm = input("Do you want to merge with existing tasks? (y/n): ").lower()
+        
+        if confirm == "y":
+            tasks.extend(imported_tasks)
+            save_tasks(tasks)
+            print(f"Imported and merged {len(imported_tasks)} tasks.")
+        else:
+            print("Import cancelled.")
+            
+    except FileNotFoundError:
+        print(f"File '{filename}' not found.")
+    except json.JSONDecodeError:
+        print("Invalid JSON file.")
+    except Exception as e:
+        print(f"Error importing tasks: {e}")
 
 def main():
     tasks = load_tasks()
@@ -433,7 +471,9 @@ def main():
         print("10. Filter by Category")
         print("11. Filter by Status")
         print("12. View Upcoming Tasks")
-        print("13. Exit")
+        print("13. Export Tasks")
+        print("14. Import Tasks")
+        print("15. Exit")
 
         choice = input("\nChoose an option: ").strip()
 
@@ -474,12 +514,18 @@ def main():
             view_upcoming_tasks(tasks)
 
         elif choice == "13":
+            export_tasks(tasks)
+
+        elif choice == "14":
+            import_tasks(tasks)
+
+        elif choice == "15":
             print("Goodbye!")
             break
 
         else:
             print("Invalid choice. Please try again.")
 
-
 if __name__ == "__main__":
     main()
+```
