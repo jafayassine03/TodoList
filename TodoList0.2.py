@@ -1,4 +1,3 @@
-```python
 import json
 from datetime import datetime
 
@@ -30,11 +29,11 @@ def get_status(task):
 
 def display_single_task(index, task):
     print(f"{index}. {task['title']}")
-    print(f"   Status   : {get_status(task)}")
-    print(f"   Priority : {task['priority']}")
-    print(f"   Category : {task['category']}")
-    print(f"   Due      : {task['due_date']}")
-    print(f"   Added    : {task['created_at']}")
+    print(f"    Status   : {get_status(task)}")
+    print(f"    Priority : {task['priority']}")
+    print(f"    Category : {task['category']}")
+    print(f"    Due      : {task['due_date']}")
+    print(f"    Added    : {task['created_at']}")
     print("-" * 50)
 
 def display_tasks(tasks):
@@ -453,6 +452,78 @@ def import_tasks(tasks):
     except Exception as e:
         print(f"Error importing tasks: {e}")
 
+def export_to_html(tasks):
+    if not tasks:
+        print("No tasks to export to HTML.")
+        return
+    
+    filename = input("Enter HTML filename (e.g., tasks_report.html): ").strip()
+    if not filename:
+        filename = "tasks_report.html"
+    if not filename.endswith('.html'):
+        filename += '.html'
+        
+    sorted_tasks = sort_tasks(tasks)
+    
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>To-Do List Report</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }}
+        h1 {{ color: #333; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }}
+        th, td {{ padding: 12px; border: 1px solid #ddd; text-align: left; }}
+        th {{ background-color: #4CAF50; color: white; }}
+        tr:nth-child(even) {{ background-color: #f2f2f2; }}
+        .done {{ color: green; font-weight: bold; }}
+        .pending {{ color: orange; font-weight: bold; }}
+    </style>
+</head>
+<body>
+    <h1>To-Do List Report</h1>
+    <p>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Category</th>
+            <th>Due Date</th>
+            <th>Added At</th>
+        </tr>
+"""
+    
+    for i, task in enumerate(sorted_tasks, start=1):
+        status_text = get_status(task)
+        status_class = "done" if task["completed"] else "pending"
+        due = task["due_date"] if task["due_date"] != "9999-12-31" else "None"
+        html_content += f"""
+        <tr>
+            <td>{i}</td>
+            <td>{task['title']}</td>
+            <td class="{status_class}">{status_text}</td>
+            <td>{task['priority']}</td>
+            <td>{task['category']}</td>
+            <td>{due}</td>
+            <td>{task['created_at']}</td>
+        </tr>
+"""
+
+    html_content += """
+    </table>
+</body>
+</html>
+"""
+
+    try:
+        with open(filename, "w") as f:
+            f.write(html_content)
+        print(f"Tasks successfully exported to HTML file: {filename}")
+    except Exception as e:
+        print(f"Error exporting to HTML: {e}")
+
 def main():
     tasks = load_tasks()
 
@@ -473,7 +544,8 @@ def main():
         print("12. View Upcoming Tasks")
         print("13. Export Tasks")
         print("14. Import Tasks")
-        print("15. Exit")
+        print("15. Export to HTML")
+        print("16. Exit")
 
         choice = input("\nChoose an option: ").strip()
 
@@ -520,6 +592,9 @@ def main():
             import_tasks(tasks)
 
         elif choice == "15":
+            export_to_html(tasks)
+
+        elif choice == "16":
             print("Goodbye!")
             break
 
@@ -528,4 +603,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
