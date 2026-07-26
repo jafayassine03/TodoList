@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 FILE = "tasks.json"
 
@@ -524,6 +524,92 @@ def export_to_html(tasks):
     except Exception as e:
         print(f"Error exporting to HTML: {e}")
 
+# NEW FEATURE: Set task deadline reminders
+def set_reminder(tasks):
+    """Set a reminder for a task by adding a reminder date"""
+    if not tasks:
+        print("No tasks available.")
+        return
+
+    display_tasks(tasks)
+
+    try:
+        idx = int(input("Enter task number to set a reminder for: ")) - 1
+        tasks_sorted = sort_tasks(tasks)
+
+        if 0 <= idx < len(tasks_sorted):
+            task = tasks_sorted[idx]
+            
+            if task["completed"]:
+                print("Cannot set reminder for completed task.")
+                return
+                
+            print(f"\nSetting reminder for: {task['title']}")
+            print(f"Current due date: {task['due_date']}")
+            
+            reminder_date = input("Enter reminder date (YYYY-MM-DD): ").strip()
+            
+            if not reminder_date:
+                print("Reminder date cannot be empty.")
+                return
+                
+            try:
+                datetime.strptime(reminder_date, "%Y-%m-%d")
+                
+                # Check if reminder date is before due date
+                if task["due_date"] != "9999-12-31":
+                    if reminder_date > task["due_date"]:
+                        print("Warning: Reminder date is after the due date!")
+                        confirm = input("Continue anyway? (y/n): ").lower()
+                        if confirm != "y":
+                            print("Reminder not set.")
+                            return
+                
+                # Add reminder field to task
+                task["reminder"] = reminder_date
+                save_tasks(tasks)
+                print(f"Reminder set for {reminder_date}!")
+                
+            except ValueError:
+                print("Invalid date format. Please use YYYY-MM-DD.")
+                
+        else:
+            print("Invalid task number.")
+
+    except ValueError:
+        print("Please enter a valid number.")
+
+def view_reminders(tasks):
+    """View all tasks that have reminders set"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    tasks_with_reminders = [
+        task for task in tasks 
+        if "reminder" in task and not task["completed"]
+    ]
+    
+    if not tasks_with_reminders:
+        print("\nNo reminders set for any tasks.")
+        return
+    
+    # Sort by reminder date
+    tasks_with_reminders = sorted(
+        tasks_with_reminders, 
+        key=lambda x: x["reminder"]
+    )
+    
+    print("\nTASKS WITH REMINDERS")
+    print("=" * 50)
+    
+    for i, task in enumerate(tasks_with_reminders, start=1):
+        display_single_task(i, task)
+        print(f"    Reminder : {task['reminder']}")
+        if task["reminder"] < today:
+            print("    ⚠️ REMINDER IS PAST DUE!")
+        elif task["reminder"] == today:
+            print("    🔔 REMINDER IS TODAY!")
+        print("-" * 50)
+
 def main():
     tasks = load_tasks()
 
@@ -545,7 +631,9 @@ def main():
         print("13. Export Tasks")
         print("14. Import Tasks")
         print("15. Export to HTML")
-        print("16. Exit")
+        print("16. Set Reminder for Task")  # NEW FEATURE
+        print("17. View All Reminders")      # NEW FEATURE
+        print("18. Exit")
 
         choice = input("\nChoose an option: ").strip()
 
@@ -594,7 +682,13 @@ def main():
         elif choice == "15":
             export_to_html(tasks)
 
-        elif choice == "16":
+        elif choice == "16":  # NEW FEATURE
+            set_reminder(tasks)
+
+        elif choice == "17":  # NEW FEATURE
+            view_reminders(tasks)
+
+        elif choice == "18":
             print("Goodbye!")
             break
 
