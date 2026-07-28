@@ -524,9 +524,7 @@ def export_to_html(tasks):
     except Exception as e:
         print(f"Error exporting to HTML: {e}")
 
-# NEW FEATURE: Set task deadline reminders
 def set_reminder(tasks):
-    """Set a reminder for a task by adding a reminder date"""
     if not tasks:
         print("No tasks available.")
         return
@@ -556,7 +554,6 @@ def set_reminder(tasks):
             try:
                 datetime.strptime(reminder_date, "%Y-%m-%d")
                 
-                # Check if reminder date is before due date
                 if task["due_date"] != "9999-12-31":
                     if reminder_date > task["due_date"]:
                         print("Warning: Reminder date is after the due date!")
@@ -565,7 +562,6 @@ def set_reminder(tasks):
                             print("Reminder not set.")
                             return
                 
-                # Add reminder field to task
                 task["reminder"] = reminder_date
                 save_tasks(tasks)
                 print(f"Reminder set for {reminder_date}!")
@@ -580,7 +576,6 @@ def set_reminder(tasks):
         print("Please enter a valid number.")
 
 def view_reminders(tasks):
-    """View all tasks that have reminders set"""
     today = datetime.now().strftime("%Y-%m-%d")
     
     tasks_with_reminders = [
@@ -592,7 +587,6 @@ def view_reminders(tasks):
         print("\nNo reminders set for any tasks.")
         return
     
-    # Sort by reminder date
     tasks_with_reminders = sorted(
         tasks_with_reminders, 
         key=lambda x: x["reminder"]
@@ -609,6 +603,40 @@ def view_reminders(tasks):
         elif task["reminder"] == today:
             print("    🔔 REMINDER IS TODAY!")
         print("-" * 50)
+
+def duplicate_task(tasks):
+    if not tasks:
+        print("No tasks available to duplicate.")
+        return
+
+    display_tasks(tasks)
+
+    try:
+        idx = int(input("Enter task number to duplicate: ")) - 1
+        tasks_sorted = sort_tasks(tasks)
+
+        if 0 <= idx < len(tasks_sorted):
+            original = tasks_sorted[idx]
+            
+            new_task = {
+                "title": original["title"] + " (Copy)",
+                "completed": False,
+                "priority": original["priority"],
+                "due_date": original["due_date"],
+                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "category": original["category"]
+            }
+            
+            if "reminder" in original:
+                new_task["reminder"] = original["reminder"]
+
+            tasks.append(new_task)
+            save_tasks(tasks)
+            print(f"Task duplicated successfully as: {new_task['title']}")
+        else:
+            print("Invalid task number.")
+    except ValueError:
+        print("Please enter a valid number.")
 
 def main():
     tasks = load_tasks()
@@ -631,9 +659,10 @@ def main():
         print("13. Export Tasks")
         print("14. Import Tasks")
         print("15. Export to HTML")
-        print("16. Set Reminder for Task")  # NEW FEATURE
-        print("17. View All Reminders")      # NEW FEATURE
-        print("18. Exit")
+        print("16. Set Reminder for Task")
+        print("17. View All Reminders")
+        print("18. Duplicate Task")
+        print("19. Exit")
 
         choice = input("\nChoose an option: ").strip()
 
@@ -682,13 +711,16 @@ def main():
         elif choice == "15":
             export_to_html(tasks)
 
-        elif choice == "16":  # NEW FEATURE
+        elif choice == "16":
             set_reminder(tasks)
 
-        elif choice == "17":  # NEW FEATURE
+        elif choice == "17":
             view_reminders(tasks)
 
         elif choice == "18":
+            duplicate_task(tasks)
+
+        elif choice == "19":
             print("Goodbye!")
             break
 
